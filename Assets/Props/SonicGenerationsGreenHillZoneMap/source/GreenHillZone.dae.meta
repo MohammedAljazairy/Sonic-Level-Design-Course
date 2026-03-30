@@ -1,0 +1,395 @@
+fileFormatVersion: 2
+guid: a81812e68add04549b2e77d97c49c03e
+ModelImporter:
+  serializedVersion: 24200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_etc_km1_light02
+    second: {fileID: 2100000, guid: 4c808c68cede93e40a720ce9e025e70a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_ground_km1_farground
+    second: {fileID: 2100000, guid: 63ba6b824a7d5294799167bd04f8188d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_ground_sk_earth01
+    second: {fileID: 2100000, guid: 24e5824f48cfc9346b7fd7365e65b551, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_ground_sk_earth02
+    second: {fileID: 2100000, guid: c93dcdb326edbaf4392d3af6f43521a9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_ground_sk_earth05
+    second: {fileID: 2100000, guid: a3de3aa0c52163341b16efe40b5c5674, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_ground_sk_grass01_alpha
+    second: {fileID: 2100000, guid: 09045ab2526595d4cb46f034aafb79e2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_ground_sk_grass01_panch
+    second: {fileID: 2100000, guid: 190a57f9f00d11e41859af985f965c38, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km1_medium
+    second: {fileID: 2100000, guid: 0f9e04e0bba3c4344837caa5e0dbcfe2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_farblockA
+    second: {fileID: 2100000, guid: 0333e877f7339464093bf01e47d267be, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_logbridge02
+    second: {fileID: 2100000, guid: 13e01c50942062b4b94d1a5c9c2503ec, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_logbridge03
+    second: {fileID: 2100000, guid: 4424cec0f6ff05f4e969b89a9bc59a88, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_mountain01
+    second: {fileID: 2100000, guid: 730dc1f18be3f074c88151ebedc111ff, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_palm_01
+    second: {fileID: 2100000, guid: 51c44e637cb73f744a734b1d82eb00d1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_palm_04
+    second: {fileID: 2100000, guid: 372e7e59c0c63304c884510200696007, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_palm_05
+    second: {fileID: 2100000, guid: 4def372904f6bc14b9c8170cd2df8cb1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_sunflower01
+    second: {fileID: 2100000, guid: 883c8a7414a355740b689e33fef1e8ec, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_sunflower02
+    second: {fileID: 2100000, guid: a2c70ec78772b8c4a9c84a9b36a4e0b0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_sunflower03
+    second: {fileID: 2100000, guid: 9a46badc778652b4881567f4f70241fa, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_totemA01
+    second: {fileID: 2100000, guid: 0f71771ae7456c34abab762eab31ef0a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_totemA02
+    second: {fileID: 2100000, guid: b568656e0245ea44db1071b876ad0011, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_totemA03
+    second: {fileID: 2100000, guid: 98c622b7ce015d14bbc8d8540055eaa5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_km_totemB
+    second: {fileID: 2100000, guid: 84805b07dcb5c5a478b4652b46126280, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_metal_wall01
+    second: {fileID: 2100000, guid: 506d9fdd3cda9f44dae10c67205c091e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_plant_km1_flatflower_cmn_dn
+    second: {fileID: 2100000, guid: 1a4302b865c189e4586022ddf9ff114f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_plant_km1_ivy_common_dpn
+    second: {fileID: 2100000, guid: 68b69149070ef524aa3814db23eea60f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_plant_km1_lawn01
+    second: {fileID: 2100000, guid: f1e2cf71afac24842ae17e73e099aee6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_plant_km1_lawn02
+    second: {fileID: 2100000, guid: ea81298ca5e94e843ab34da250e79db9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_plant_sk_tree02
+    second: {fileID: 2100000, guid: ca152ced19075df47b82c0bf4749b4c2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_rock_km1_farmmountain01
+    second: {fileID: 2100000, guid: e57e352c4c54d9c4a9e0a6e81fafa5c4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_rock_km1_mount02
+    second: {fileID: 2100000, guid: a53984ba850dbad44b84ec73853d46a6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_rock_sk_wall01
+    second: {fileID: 2100000, guid: c3b2809199c879140930ce6c4e76470b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 'ghz_rock_sk_wall01_cmn_dpn[v]'
+    second: {fileID: 2100000, guid: 78ee2b4a5ccb1794488e0f1ae8ada8a5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_rock_sk_wall01_emi
+    second: {fileID: 2100000, guid: 2a72c9d9be8982740bfe76c22bc84cbb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_rock_tn1_wetwall01
+    second: {fileID: 2100000, guid: 109eaf50006245144a04051fc2c780d0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_rock_tn1_wetwall01_cmn_dpn
+    second: {fileID: 2100000, guid: b814cf1dfdabf8e4297b9de8639f4988, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_rock_yy_wall01_dif
+    second: {fileID: 2100000, guid: b9993b12aa0697d479f019c14f0ca17b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_sea02
+    second: {fileID: 2100000, guid: f951692b37b760c48ae46ba808872671, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_flowerA001
+    second: {fileID: 2100000, guid: 6eb71941d4b548a4e938f67611c3763b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_flowerA002
+    second: {fileID: 2100000, guid: 6d4d2764cbbf88a4b8eabb2cfdfd69fe, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_flowerA003
+    second: {fileID: 2100000, guid: 7b8cff93ebf24854bbe4cccc3bb5f083, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_purplerock_001
+    second: {fileID: 2100000, guid: 9a0b04eb673509746a9921c7e6166eb4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_purplerock_002
+    second: {fileID: 2100000, guid: 9a40df41c0c8728419406e3ccab6fb80, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_rope_001
+    second: {fileID: 2100000, guid: 0932c5a8e6092854b8fa54275a47ee38, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_woodbridgeboard_001
+    second: {fileID: 2100000, guid: bcb3539e311da2e429ef82210424fe46, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_woodbridgeboard_002
+    second: {fileID: 2100000, guid: a489fde4b4311d940bf6aee225ec397d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_woodbridgelog_001
+    second: {fileID: 2100000, guid: ec62fa539eb2ef44ba111a3a3eb263f5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_tn_woodbridgewoodhold_001
+    second: {fileID: 2100000, guid: b7e25daeffcc6494286c1d3335d4adb3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_water_km1_DistortionFall
+    second: {fileID: 2100000, guid: d254e848f731d6747b9f4e9974e3a843, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_water_km1_fallWhite01
+    second: {fileID: 2100000, guid: c3c9e601c227a0a48b7079b4b0853f0b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_water_km1_fallWhite02
+    second: {fileID: 2100000, guid: 409ab469c0b9fcb4d8bf9ad539b43f89, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_water_km1_fallWhite03
+    second: {fileID: 2100000, guid: 0223209f21b21e74abcf2a87ca6e340f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_water_km1_puddle
+    second: {fileID: 2100000, guid: 19e09e4d5a80c8d4198ee9351e0344ec, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_water_km1_river02
+    second: {fileID: 2100000, guid: bba40fe338d08ef4ea1ccfa084f52585, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_water_km1_river02_trans
+    second: {fileID: 2100000, guid: fc2bd9cbf0876d043ac75d2dc844abf5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_water_km1_wave02a
+    second: {fileID: 2100000, guid: 3c6b7a77f01e31244b97531e265f2795, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ghz_water_km1_wave02b
+    second: {fileID: 2100000, guid: f9022c436a212ea489fe531146ecd17f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: greenhill_far01
+    second: {fileID: 2100000, guid: 9f5651a1803fbc3498b743fa1248946f, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
