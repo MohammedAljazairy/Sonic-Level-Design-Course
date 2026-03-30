@@ -37,6 +37,17 @@ public class EnemyMotobug : MonoBehaviour
 
     void Update()
     {
+        // NEW: If Sonic is frozen (Win/Game Over), the Motobug freezes too!
+        if (player != null)
+        {
+            ImprovedPlayerController ipc = player.GetComponent<ImprovedPlayerController>();
+            if (ipc != null && !ipc.canControl)
+            {
+                if (agent != null) agent.isStopped = true;
+                return;
+            }
+        }
+
         switch (currentState)
         {
             case AIState.Patrol:
@@ -53,7 +64,6 @@ public class EnemyMotobug : MonoBehaviour
 
     private void PatrolLogic()
     {
-        // Make sure NavMesh is in control for wandering
         agent.isStopped = false; 
         agent.speed = patrolSpeed;
 
@@ -70,21 +80,17 @@ public class EnemyMotobug : MonoBehaviour
 
     private void ChaseLogic()
     {
-        // 1. Tell the NavMesh to stop fighting us!
         agent.isStopped = true;
 
-        // 2. Lock the Y-Axis so the Motobug doesn't fly into the air if Sonic jumps
         Vector3 targetPos = player.position;
         targetPos.y = transform.position.y;
 
-        // 3. YOUR IDEA: Use pure MoveTowards for buttery smooth chasing
         transform.position = Vector3.MoveTowards(
             transform.position, 
             targetPos, 
             chaseSpeed * Time.deltaTime
         );
 
-        // 4. Look directly at Sonic
         Vector3 lookDir = (targetPos - transform.position).normalized;
         if (lookDir != Vector3.zero)
         {
@@ -92,7 +98,6 @@ public class EnemyMotobug : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
         }
 
-        // 5. If Sonic runs away too far, go back to patrolling
         if (Vector3.Distance(transform.position, player.position) > detectionRadius * 1.5f)
         {
             currentState = AIState.Patrol;
@@ -127,7 +132,7 @@ public class EnemyMotobug : MonoBehaviour
         {
             if (sonic.IsInBallForm)
             {
-                AudioSource.PlayClipAtPoint(destroyS,transform.position);
+                if (destroyS != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(destroyS);
                 Destroy(gameObject);
             }
             else
@@ -138,10 +143,4 @@ public class EnemyMotobug : MonoBehaviour
             }
         }
     }
-
-    // private void OnDrawGizmosSelected()
-    // {
-    //     Gizmos.color = Color.yellow;
-    //     Gizmos.DrawWireSphere(transform.position, detectionRadius);
-    // }
 }

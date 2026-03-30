@@ -1,6 +1,7 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // Required to restart the level
+using UnityEngine.SceneManagement; 
 using System.Collections;
+
 public class PlayerRespawn : MonoBehaviour
 {
     [Header("Health System")]
@@ -15,6 +16,7 @@ public class PlayerRespawn : MonoBehaviour
     private ImprovedPlayerController movementController;
     private bool isDead = false;
     public AudioSource bgmSource;
+    
     void Start()
     {
         movementController = GetComponent<ImprovedPlayerController>();
@@ -49,7 +51,7 @@ public class PlayerRespawn : MonoBehaviour
         }
         else
         {
-            AudioSource.PlayClipAtPoint(Deathsound,transform.position);
+            if (Deathsound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(Deathsound);
             Respawn();
         }
     }
@@ -58,7 +60,6 @@ public class PlayerRespawn : MonoBehaviour
     {
         if (currentRespawnPoint != null)
         {
-            
             transform.position = currentRespawnPoint.position;
             movementController.ResetMomentum();
         }
@@ -67,9 +68,11 @@ public class PlayerRespawn : MonoBehaviour
     private void GameOver()
     {
         if (bgmSource != null) bgmSource.Stop();
-        AudioSource.PlayClipAtPoint(GameoverSound,transform.position);
+        if (GameoverSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(GameoverSound);
         isDead = true;
-        movementController.ResetMomentum(); 
+        
+        // FREEZE SONIC
+        movementController.LockControls(); 
         
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
         
@@ -79,7 +82,6 @@ public class PlayerRespawn : MonoBehaviour
     private IEnumerator RestartLevelRoutine()
     {
         yield return new WaitForSeconds(13f);
-    
         SceneManager.LoadScene(SceneManager.GetActiveScene().name); 
     }
 }

@@ -41,13 +41,12 @@ public class PlayerScore : MonoBehaviour
             UpdateTimeUI();
         }
     }
-public void UpdateHealthUI(int currentHealth)
+
+    public void UpdateHealthUI(int currentHealth)
     {
-        if (healthText != null)
-        {
-            healthText.text = "" + currentHealth;
-        }
+        if (healthText != null) healthText.text = "" + currentHealth;
     }
+
     public void AddRings(int amount)
     {
         ringCount += amount;
@@ -89,9 +88,16 @@ public void UpdateHealthUI(int currentHealth)
     {
         if (isLevelFinished) return;
         isLevelFinished = true;
+        
+        // FREEZE SONIC
+        GetComponent<ImprovedPlayerController>().LockControls();
+
         if (bgmSource != null) bgmSource.Stop();
         if (winPanel != null) winPanel.SetActive(true);
-        AudioSource.PlayClipAtPoint(WinSound,transform.position);
+        
+        if (WinSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(WinSound);
+        if (finishA != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(finishA);
+
         int timeBonus = CalculateTimeBonus(timeElapsed);
         int ringBonus = ringCount * 100; 
 
@@ -100,8 +106,6 @@ public void UpdateHealthUI(int currentHealth)
         winTotalScoreText.text = "" + score;
 
         StartCoroutine(TallyScore(timeBonus, ringBonus));
-        AudioSource.PlayClipAtPoint(finishA,transform.position);
-
     }
 
     private int CalculateTimeBonus(float time)
@@ -109,17 +113,17 @@ public void UpdateHealthUI(int currentHealth)
         if (time <= 29f) return 50000;
         if (time <= 44f) return 10000;
         if (time <= 59f) return 5000;
-        if (time <= 89f) return 4000; // 1:29
-        if (time <= 119f) return 3000; // 1:59
-        if (time <= 179f) return 2000; // 2:59
-        if (time <= 239f) return 1000; // 3:59
-        if (time <= 299f) return 500;  // 4:59
+        if (time <= 89f) return 4000; 
+        if (time <= 119f) return 3000; 
+        if (time <= 179f) return 2000; 
+        if (time <= 239f) return 1000; 
+        if (time <= 299f) return 500;  
         return 0;
     }
 
     private IEnumerator TallyScore(int tBonus, int rBonus)
     {
-        yield return new WaitForSeconds(1f); // Dramatic pause before tallying starts
+        yield return new WaitForSeconds(1f); 
 
         while (tBonus > 0 || rBonus > 0)
         {
@@ -140,10 +144,17 @@ public void UpdateHealthUI(int currentHealth)
 
             winTotalScoreText.text = ""+ score;
 
-            if (tallyScoreSound != null)
-                AudioSource.PlayClipAtPoint(tallyScoreSound, transform.position);
+            if (tallyScoreSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(tallyScoreSound);
 
             yield return new WaitForSeconds(0.05f);
         }
+        
+        yield return new WaitForSeconds(3f); // Wait a few seconds to admire the final score
+        
+        // EXIT THE GAME
+        Application.Quit();
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false; // This exits play mode in the Unity Editor
+        #endif
     }
 }

@@ -6,7 +6,7 @@ public class SpilledRing : MonoBehaviour
     public float lifetime = 10f;       // Disappears after 10 seconds
     public float collectDelay = 1.5f;  // Can't be collected for 1.5 seconds
     public float rotationSpeed = 300f; // Spin really fast!
-
+    public AudioClip ringpick;
     private float age = 0f;
 
     void Start()
@@ -32,6 +32,7 @@ public class SpilledRing : MonoBehaviour
         if (sonicScore != null)
         {
             sonicScore.AddRings(1);
+            Camera.main.GetComponent<AudioSource>().PlayOneShot(ringpick);
             Destroy(gameObject);
         }
     }

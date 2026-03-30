@@ -9,15 +9,17 @@ public class ImprovedPlayerController : MonoBehaviour
     public GameObject ballModel;
 
     [Header("Ring Spilling")]
-    public GameObject spilledRingPrefab; // Drag your SpilledRing prefab here
-    public int maxSpilledRings = 32;     // Limits the explosion so the game doesn't crash
+    public GameObject spilledRingPrefab; 
+    public int maxSpilledRings = 32;    
     public AudioClip loseRingA;
+
     [Header("Momentum Settings")]
     public float acceleration = 15f;
     public float deceleration = 20f;
     public float maxSpeed = 30f;
     public float turnSpeed = 15f;
     public AudioClip jumpA;
+
     [Header("Jump & Physics")]
     public float jumpForce = 10f;
     public float customGravityMultiplier = 2f; 
@@ -36,8 +38,11 @@ public class ImprovedPlayerController : MonoBehaviour
     [Header("State Parameters")]
     public float idleTimeThreshold = 10f; 
     public bool isDamaged = false; 
-        public AudioClip SpindashS1;
+    public AudioClip SpindashS1;
     public AudioClip SpindashS2;
+    
+    public bool canControl = true; // NEW: Controls if Sonic is allowed to move!
+
     private Rigidbody rb;
     private Animator animator;
     private Transform camTransform;
@@ -54,7 +59,6 @@ public class ImprovedPlayerController : MonoBehaviour
     private bool jumpRequested = false;
     private bool isJumping = false; 
 
-    // Allows enemies/projectiles to check if Sonic is currently attacking
     public bool IsInBallForm 
     { 
         get { return isSpinDashing || currentBoostTimer > 0f || isJumping; } 
@@ -73,6 +77,8 @@ public class ImprovedPlayerController : MonoBehaviour
 
     void Update()
     {
+        if (!canControl) return; // Freezes Update if Game Over or Win
+
         if (jumpCooldownTimer > 0f) jumpCooldownTimer -= Time.deltaTime;
 
         CheckGrounded();
@@ -82,6 +88,8 @@ public class ImprovedPlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!canControl) return; // Freezes physics if Game Over or Win
+
         ApplyMomentumAndRotation(); 
         ApplyCustomGravity();
 
@@ -110,24 +118,19 @@ public class ImprovedPlayerController : MonoBehaviour
         float z = Input.GetAxisRaw("Vertical");
         bool hasMovementInput = Mathf.Abs(x) > 0.1f || Mathf.Abs(z) > 0.1f;
 
-        // --- IDLE TIMER ---
         if (!hasMovementInput && currentSpeed < 0.11f && isGrounded && !Input.GetKey(KeyCode.F) && !isDamaged)
-        {
             idleTimer += Time.deltaTime;
-        }
         else
-        {
             idleTimer = 0f; 
-        }
 
         if (currentBoostTimer > 0f) currentBoostTimer -= Time.deltaTime; 
 
-        // --- CROUCH, SPIN DASH & RUNNING ROLL ---
         if (animator != null) animator.SetBool("isCrouch", false);
 
         if (Input.GetKeyDown(KeyCode.F) && isGrounded && currentSpeed > 5f && !isDamaged)
         {
             currentBoostTimer = boostDuration; 
+            Camera.main.GetComponent<AudioSource>().PlayOneShot(SpindashS1);
         }
         else if (Input.GetKey(KeyCode.F) && isGrounded && currentSpeed <= 5f && currentBoostTimer <= 0f && !isDamaged)
         {
@@ -147,7 +150,9 @@ public class ImprovedPlayerController : MonoBehaviour
             {
                 isSpinDashing = true;
                 if (animator != null) animator.SetBool("isCrouch", false); 
-                AudioSource.PlayClipAtPoint(SpindashS1,transform.position);
+                
+                if (SpindashS1 != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(SpindashS1);
+                
                 currentSpinCharge += spinChargeRate;
                 currentSpinCharge = Mathf.Clamp(currentSpinCharge, 0, maxSpinCharge);
             }
@@ -156,7 +161,7 @@ public class ImprovedPlayerController : MonoBehaviour
         else if (isSpinDashing)
         {
             isSpinDashing = false;
-            AudioSource.PlayClipAtPoint(SpindashS2,transform.position);
+            if (SpindashS2 != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(SpindashS2);
             currentSpeed = Mathf.Max(currentSpinCharge, 15f); 
             currentSpinCharge = 0f;
             currentBoostTimer = boostDuration;
@@ -164,7 +169,6 @@ public class ImprovedPlayerController : MonoBehaviour
             if (moveDirection == Vector3.zero) moveDirection = transform.forward;
         }
 
-        // --- MOVEMENT & STEERING LOGIC ---
         if (isDamaged) return; 
 
         Vector3 inputDir = Vector3.zero;
@@ -182,9 +186,7 @@ public class ImprovedPlayerController : MonoBehaviour
             currentSpeed -= (deceleration * 0.1f) * Time.deltaTime; 
             
             if (inputDir.magnitude >= 0.1f)
-            {
                 moveDirection = Vector3.MoveTowards(moveDirection, inputDir, (turnSpeed * 0.1f) * Time.deltaTime).normalized;
-            }
         }
         else
         {
@@ -215,7 +217,6 @@ public class ImprovedPlayerController : MonoBehaviour
         float activeSpeedLimit = (currentBoostTimer > 0f) ? Mathf.Max(maxSpeed, maxSpinCharge) : maxSpeed;
         currentSpeed = Mathf.Clamp(currentSpeed, 0, activeSpeedLimit);
 
-        // --- ANIMATOR UPDATES ---
         if (animator != null) 
         {
             animator.SetBool("isRunning", currentSpeed > 0.11f && !isSpinDashing && currentBoostTimer <= 0f && !Input.GetKey(KeyCode.F));
@@ -230,11 +231,10 @@ public class ImprovedPlayerController : MonoBehaviour
             animator.SetFloat("RunSpeed", animSpeedMultiplier);
         }
 
-        // --- JUMP ---
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded && !Input.GetKey(KeyCode.F) && !isDamaged)
         {
             jumpRequested = true;
-            AudioSource.PlayClipAtPoint(jumpA, transform.position);
+            if (jumpA != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(jumpA);
             isJumping = true; 
             jumpCooldownTimer = 0.1f; 
             currentBoostTimer = 0f; 
@@ -243,7 +243,7 @@ public class ImprovedPlayerController : MonoBehaviour
 
     private void ApplyMomentumAndRotation()
     {
-        if (isDamaged) return; // Prevent movement code from overriding damage knockback!
+        if (isDamaged) return; 
         if (isSpinDashing || (Input.GetKey(KeyCode.F) && currentSpeed <= 5f)) return; 
         
         Vector3 targetVelocity = moveDirection * currentSpeed;
@@ -284,11 +284,12 @@ public class ImprovedPlayerController : MonoBehaviour
         }
     }
 
-    // --- DAMAGE & RING SPILLING LOGIC ---
     public void TakeDamage(Vector3 hazardPosition)
     {
         if (isDamaged) return;
-        AudioSource.PlayClipAtPoint(loseRingA,transform.position);
+        
+        if (loseRingA != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(loseRingA);
+        
         PlayerScore score = GetComponent<PlayerScore>();
         if (score != null)
         {
@@ -297,9 +298,8 @@ public class ImprovedPlayerController : MonoBehaviour
             if (droppedRings > 0)
             {
                 SpillRings(droppedRings);
- 
             }
-else
+            else
             {
                 isDamaged = true;
                 Invoke("RecoverFromDamage", 1.5f);
@@ -362,8 +362,6 @@ else
         if (animator != null) animator.SetBool("isDamage", false);
     }
 
-    // --- MODULAR UTILITY LOGIC ---
-    // Used by the PlayerRespawn script to cleanly kill all momentum
     public void ResetMomentum()
     {
         if (rb != null) rb.linearVelocity = Vector3.zero;
@@ -376,5 +374,17 @@ else
         
         isDamaged = false;
         if (animator != null) animator.SetBool("isDamage", false);
+    }
+
+    // NEW: Call this when Game Over or Game Won to freeze Sonic!
+    public void LockControls()
+    {
+        canControl = false;
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.isKinematic = true; 
+        }
+        if (animator != null) animator.speed = 0; 
     }
 }

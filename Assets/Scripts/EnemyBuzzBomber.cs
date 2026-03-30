@@ -9,8 +9,8 @@ public class EnemyBuzzBomber : MonoBehaviour
     [Header("Targeting")]
     public Transform player;
     public float detectionRadius = 25f;
-    public float attackDistance = 12f;  // How close it gets before shooting
-    public float hoverHeight = 4f;      // How high above Sonic it hovers
+    public float attackDistance = 12f;  
+    public float hoverHeight = 4f;      
 
     [Header("Movement Speeds")]
     public float patrolSpeed = 5f;
@@ -22,9 +22,9 @@ public class EnemyBuzzBomber : MonoBehaviour
     private int currentPatrolIndex = 0;
 
     [Header("Combat Settings")]
-    public GameObject projectilePrefab; // Drag your laser prefab here
-    public Transform firePoint;         // An empty GameObject at the tip of the enemy's gun
-    public float cooldownTime = 3f;     // Time between shots
+    public GameObject projectilePrefab; 
+    public Transform firePoint;         
+    public float cooldownTime = 3f;     
     private float cooldownTimer = 0f;
 
     void Start()
@@ -35,6 +35,13 @@ public class EnemyBuzzBomber : MonoBehaviour
 
     void Update()
     {
+        // NEW: If Sonic is frozen (Win/Game Over), the BuzzBomber freezes too!
+        if (player != null)
+        {
+            ImprovedPlayerController ipc = player.GetComponent<ImprovedPlayerController>();
+            if (ipc != null && !ipc.canControl) return;
+        }
+
         switch (currentState)
         {
             case AIState.Patrol:
@@ -58,7 +65,6 @@ public class EnemyBuzzBomber : MonoBehaviour
         {
             Transform target = patrolPoints[currentPatrolIndex];
             
-            // Fly towards the patrol point
             transform.position = Vector3.MoveTowards(transform.position, target.position, patrolSpeed * Time.deltaTime);
             LookAtTarget(target.position);
 
@@ -68,7 +74,6 @@ public class EnemyBuzzBomber : MonoBehaviour
             }
         }
 
-        // Do we see Sonic?
         if (Vector3.Distance(transform.position, player.position) <= detectionRadius)
         {
             currentState = AIState.Chase;
@@ -79,23 +84,19 @@ public class EnemyBuzzBomber : MonoBehaviour
     {
         float distanceToSonic = Vector3.Distance(transform.position, player.position);
 
-        // We want to hover *above* Sonic
         Vector3 hoverTarget = player.position + (Vector3.up * hoverHeight);
 
-        // If we are too far, fly closer
         if (distanceToSonic > attackDistance)
         {
             transform.position = Vector3.MoveTowards(transform.position, hoverTarget, chaseSpeed * Time.deltaTime);
         }
         else
         {
-            // We are in range! Time to shoot.
             currentState = AIState.Shoot;
         }
 
         LookAtTarget(player.position);
 
-        // Sonic ran away
         if (distanceToSonic > detectionRadius * 1.5f)
         {
             currentState = AIState.Patrol;
@@ -104,7 +105,6 @@ public class EnemyBuzzBomber : MonoBehaviour
 
     private void ShootLogic()
     {
-        // Spawn the projectile and point it at Sonic
         if (projectilePrefab != null && firePoint != null)
         {
             Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
@@ -116,7 +116,6 @@ public class EnemyBuzzBomber : MonoBehaviour
 
     private void CooldownLogic()
     {
-        // Just hover in place and stare at Sonic while reloading
         LookAtTarget(player.position);
 
         cooldownTimer -= Time.deltaTime;
@@ -136,7 +135,6 @@ public class EnemyBuzzBomber : MonoBehaviour
         }
     }
 
-    // --- Physical Collision (If Sonic jumps into the BuzzBomber) ---
     private void OnCollisionEnter(Collision collision)
     {
         ImprovedPlayerController sonic = collision.gameObject.GetComponent<ImprovedPlayerController>();
@@ -145,21 +143,13 @@ public class EnemyBuzzBomber : MonoBehaviour
         {
             if (sonic.IsInBallForm)
             {
-                AudioSource.PlayClipAtPoint(destroyS,transform.position);
-                Destroy(gameObject); // Sonic destroyed the enemy!
+                if (destroyS != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(destroyS);
+                Destroy(gameObject); 
             }
             else
             {
-                sonic.TakeDamage(transform.position); // Sonic got hurt!
+                sonic.TakeDamage(transform.position); 
             }
         }
     }
-
-    // private void OnDrawGizmosSelected()
-    // {
-    //     Gizmos.color = Color.red;
-    //     Gizmos.DrawWireSphere(transform.position, attackDistance);
-    //     Gizmos.color = Color.yellow;
-    //     Gizmos.DrawWireSphere(transform.position, detectionRadius);
-    // }
 }
