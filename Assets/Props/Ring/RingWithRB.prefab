@@ -156,3 +156,4 @@ MonoBehaviour:
   lifetime: 10
   collectDelay: 1.5
   rotationSpeed: 300
+  ringpick: {fileID: 8300000, guid: 41cb58c9491c331479778d5759616f77, type: 3}
