@@ -127,7 +127,7 @@ public class PlayerScore : MonoBehaviour
 
         while (tBonus > 0 || rBonus > 0)
         {
-            int addAmount = 1000;
+            int addAmount = 500;
 
             if (tBonus > 0)
             {

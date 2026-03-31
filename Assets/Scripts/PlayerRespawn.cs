@@ -81,7 +81,7 @@ public class PlayerRespawn : MonoBehaviour
 
     private IEnumerator RestartLevelRoutine()
     {
-        yield return new WaitForSeconds(13f);
+        yield return new WaitForSeconds(12f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name); 
     }
 }
