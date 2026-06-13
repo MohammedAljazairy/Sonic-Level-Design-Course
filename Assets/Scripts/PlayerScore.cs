@@ -9,6 +9,7 @@ public class PlayerScore : MonoBehaviour
     public int score = 0;
     public float timeElapsed = 0f;
     public bool isLevelFinished = false;
+    public bool isGameActive = false;
     public AudioSource bgmSource;
     
     [Header("In-Game UI")]
@@ -37,7 +38,7 @@ public class PlayerScore : MonoBehaviour
 
     void Update()
     {
-        if (!isLevelFinished)
+        if (isGameActive && !isLevelFinished)
         {
             timeElapsed += Time.deltaTime;
             UpdateTimeUI();
