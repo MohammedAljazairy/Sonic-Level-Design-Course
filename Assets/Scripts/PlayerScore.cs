@@ -9,7 +9,7 @@ public class PlayerScore : MonoBehaviour
     public int score = 0;
     public float timeElapsed = 0f;
     public bool isLevelFinished = false;
-    public bool isGameActive = false;
+    public bool isGameActive = false; 
     public AudioSource bgmSource;
     
     [Header("In-Game UI")]
@@ -27,8 +27,8 @@ public class PlayerScore : MonoBehaviour
     [Header("Audio")]
     public AudioClip tallyScoreSound;
     public AudioClip tallyScoreSoundLoop;
-    public AudioClip WinSound; // The victory theme song
-    public AudioClip finishA;  // The sound when you first touch the signpost
+    public AudioClip WinSound; 
+    public AudioClip finishA;  
 
     void Start()
     {
@@ -53,6 +53,10 @@ public class PlayerScore : MonoBehaviour
     public void AddRings(int amount)
     {
         ringCount += amount;
+        
+        // --- EXTRA FIX: Ensure rings can never go below 0 in the UI ---
+        ringCount = Mathf.Max(0, ringCount);
+        
         AddScore(amount * 100);
         UpdateUI();
     }
@@ -60,6 +64,9 @@ public class PlayerScore : MonoBehaviour
     public void AddScore(int amount)
     {
         score += amount;
+        
+        // Make sure score never dips below 0 either!
+        score = Mathf.Max(0, score);
         UpdateUI();
     }
 
@@ -92,39 +99,32 @@ public class PlayerScore : MonoBehaviour
         if (isLevelFinished) return;
         isLevelFinished = true;
         
-        // Freeze Sonic instantly
         GetComponent<ImprovedPlayerController>().LockControls();
 
-        // 1. Play the instant "hit signpost" win sound. BGM keeps playing!
-        if (WinSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(finishA);
+        if (WinSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(WinSound);
 
-        // Calculate final bonuses
         int timeBonus = CalculateTimeBonus(timeElapsed);
-        int ringBonus = ringCount * 100; 
+        
+        // --- THE MAIN FIX: Force the ring bonus to bottom out at 0 ---
+        int ringBonus = Mathf.Max(0, ringCount * 100); 
 
-        // Start the timed sequence
         StartCoroutine(WinSequenceTiming(timeBonus, ringBonus));
     }
 
     private IEnumerator WinSequenceTiming(int tBonus, int rBonus)
     {
-        // 2. Wait 2 seconds while the level BGM is still playing
         yield return new WaitForSeconds(2f);
 
-        // 3. Stop the BGM and play the Victory Song
         if (bgmSource != null) bgmSource.Stop();
-        if (finishA != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(WinSound);
+        if (finishA != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(finishA);
 
-        // Show the UI panel with the static numbers
         if (winPanel != null) winPanel.SetActive(true);
         winTimeBonusText.text = "" + tBonus;
         winRingBonusText.text = "" + rBonus;
         winTotalScoreText.text = "" + score;
 
-        // 4. Wait 3 more seconds (making it exactly 5 seconds since winning)
         yield return new WaitForSeconds(3f);
 
-        // 5. Start the rapid tally loop
         StartCoroutine(TallyScore(tBonus, rBonus));
     }
 
@@ -163,17 +163,14 @@ public class PlayerScore : MonoBehaviour
             winTotalScoreText.text = "" + score;
             UpdateUI(); 
 
-            // Play the repeating tally loop sound
             if (tallyScoreSoundLoop != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(tallyScoreSoundLoop);
 
             yield return new WaitForSeconds(0.05f);
         }
         
-        // Play one final "Ping" at the very end when numbers hit 0
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.5f);
         if (tallyScoreSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(tallyScoreSound);
         
-        // Wait a few seconds to admire the final score before exiting
         yield return new WaitForSeconds(3f); 
         
         Application.Quit();
