@@ -16,12 +16,17 @@ public class PlayerRespawn : MonoBehaviour
     private ImprovedPlayerController movementController;
     private bool isDead = false;
     public AudioSource bgmSource;
+
+    private Vector3 defaultStartPos; 
     
     void Start()
     {
         movementController = GetComponent<ImprovedPlayerController>();
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         GetComponent<PlayerScore>().UpdateHealthUI(health);
+        
+        // Save his exact starting position the moment the game loads!
+        defaultStartPos = transform.position; 
     }
 
     void Update()
@@ -45,7 +50,8 @@ public class PlayerRespawn : MonoBehaviour
 
         health--;
         GetComponent<PlayerScore>().UpdateHealthUI(health);
-        if (health < 0) 
+        
+        if (health <= 0) 
         {
             GameOver();
         }
@@ -58,11 +64,18 @@ public class PlayerRespawn : MonoBehaviour
 
     public void Respawn()
     {
+        // If we hit a checkpoint, go there
         if (currentRespawnPoint != null)
         {
             transform.position = currentRespawnPoint.position;
-            movementController.ResetMomentum();
         }
+        // If we HAVEN'T hit a checkpoint yet, go back to the very beginning!
+        else
+        {
+            transform.position = defaultStartPos;
+        }
+        
+        movementController.ResetMomentum();
     }
 
     private void GameOver()
@@ -71,7 +84,6 @@ public class PlayerRespawn : MonoBehaviour
         if (GameoverSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(GameoverSound);
         isDead = true;
         
-        // FREEZE SONIC
         movementController.LockControls(); 
         
         if (gameOverPanel != null) gameOverPanel.SetActive(true);

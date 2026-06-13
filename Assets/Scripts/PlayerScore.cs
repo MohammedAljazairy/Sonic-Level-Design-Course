@@ -10,6 +10,7 @@ public class PlayerScore : MonoBehaviour
     public float timeElapsed = 0f;
     public bool isLevelFinished = false;
     public AudioSource bgmSource;
+    
     [Header("In-Game UI")]
     public TextMeshProUGUI ringText;
     public TextMeshProUGUI scoreText;
@@ -24,8 +25,9 @@ public class PlayerScore : MonoBehaviour
 
     [Header("Audio")]
     public AudioClip tallyScoreSound;
-    public AudioClip WinSound;
-    public AudioClip finishA;
+    public AudioClip tallyScoreSoundLoop;
+    public AudioClip WinSound; // The victory theme song
+    public AudioClip finishA;  // The sound when you first touch the signpost
 
     void Start()
     {
@@ -89,23 +91,40 @@ public class PlayerScore : MonoBehaviour
         if (isLevelFinished) return;
         isLevelFinished = true;
         
-        // FREEZE SONIC
+        // Freeze Sonic instantly
         GetComponent<ImprovedPlayerController>().LockControls();
 
-        if (bgmSource != null) bgmSource.Stop();
-        if (winPanel != null) winPanel.SetActive(true);
-        
-        if (WinSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(WinSound);
-        if (finishA != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(finishA);
+        // 1. Play the instant "hit signpost" win sound. BGM keeps playing!
+        if (WinSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(finishA);
 
+        // Calculate final bonuses
         int timeBonus = CalculateTimeBonus(timeElapsed);
         int ringBonus = ringCount * 100; 
 
-        winTimeBonusText.text = "" + timeBonus;
-        winRingBonusText.text = "" + ringBonus;
+        // Start the timed sequence
+        StartCoroutine(WinSequenceTiming(timeBonus, ringBonus));
+    }
+
+    private IEnumerator WinSequenceTiming(int tBonus, int rBonus)
+    {
+        // 2. Wait 2 seconds while the level BGM is still playing
+        yield return new WaitForSeconds(2f);
+
+        // 3. Stop the BGM and play the Victory Song
+        if (bgmSource != null) bgmSource.Stop();
+        if (finishA != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(WinSound);
+
+        // Show the UI panel with the static numbers
+        if (winPanel != null) winPanel.SetActive(true);
+        winTimeBonusText.text = "" + tBonus;
+        winRingBonusText.text = "" + rBonus;
         winTotalScoreText.text = "" + score;
 
-        StartCoroutine(TallyScore(timeBonus, ringBonus));
+        // 4. Wait 3 more seconds (making it exactly 5 seconds since winning)
+        yield return new WaitForSeconds(3f);
+
+        // 5. Start the rapid tally loop
+        StartCoroutine(TallyScore(tBonus, rBonus));
     }
 
     private int CalculateTimeBonus(float time)
@@ -123,8 +142,6 @@ public class PlayerScore : MonoBehaviour
 
     private IEnumerator TallyScore(int tBonus, int rBonus)
     {
-        yield return new WaitForSeconds(1f); 
-
         while (tBonus > 0 || rBonus > 0)
         {
             int addAmount = 500;
@@ -133,28 +150,34 @@ public class PlayerScore : MonoBehaviour
             {
                 tBonus -= addAmount;
                 score += addAmount;
-                winTimeBonusText.text =""+ tBonus;
+                winTimeBonusText.text = "" + tBonus;
             }
             else if (rBonus > 0)
             {
                 rBonus -= addAmount;
                 score += addAmount;
-                winRingBonusText.text =""+ rBonus;
+                winRingBonusText.text = "" + rBonus;
             }
 
-            winTotalScoreText.text = ""+ score;
+            winTotalScoreText.text = "" + score;
+            UpdateUI(); 
 
-            if (tallyScoreSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(tallyScoreSound);
+            // Play the repeating tally loop sound
+            if (tallyScoreSoundLoop != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(tallyScoreSoundLoop);
 
             yield return new WaitForSeconds(0.05f);
         }
         
-        yield return new WaitForSeconds(3f); // Wait a few seconds to admire the final score
+        // Play one final "Ping" at the very end when numbers hit 0
+        yield return new WaitForSeconds(0.2f);
+        if (tallyScoreSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(tallyScoreSound);
         
-        // EXIT THE GAME
+        // Wait a few seconds to admire the final score before exiting
+        yield return new WaitForSeconds(3f); 
+        
         Application.Quit();
         #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false; // This exits play mode in the Unity Editor
+        UnityEditor.EditorApplication.isPlaying = false; 
         #endif
     }
 }

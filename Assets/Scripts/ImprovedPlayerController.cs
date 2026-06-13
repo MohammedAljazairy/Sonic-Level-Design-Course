@@ -13,11 +13,24 @@ public class ImprovedPlayerController : MonoBehaviour
     public int maxSpilledRings = 32;    
     public AudioClip loseRingA;
 
+    [Header("Visual Effects")]
+    public GameObject spinDustPrefab; // Drag your smoke particle prefab here!
+    public Transform dustSpawnPoint;  // Drag your empty GameObject here!
+    private GameObject currentSpinDust; // Keeps track of the smoke while charging
+
     [Header("Momentum Settings")]
     public float acceleration = 15f;
     public float deceleration = 20f;
     public float maxSpeed = 30f;
     public float turnSpeed = 15f;
+    
+    [Tooltip("How much acceleration Sonic starts with (0.1 = 10%, 1.0 = 100%)")]
+    [Range(0.01f, 1f)]
+    public float startingAccelMultiplier = 0.15f;
+    
+    [Tooltip("The speed at which Sonic reaches 100% full acceleration")]
+    public float speedToMaxAccel = 15f;
+    
     public AudioClip jumpA;
 
     [Header("Jump & Physics")]
@@ -40,8 +53,9 @@ public class ImprovedPlayerController : MonoBehaviour
     public bool isDamaged = false; 
     public AudioClip SpindashS1;
     public AudioClip SpindashS2;
+ 
     
-    public bool canControl = true; // NEW: Controls if Sonic is allowed to move!
+    public bool canControl = true; 
 
     private Rigidbody rb;
     private Animator animator;
@@ -53,11 +67,14 @@ public class ImprovedPlayerController : MonoBehaviour
     private float currentBoostTimer = 0f; 
     private float idleTimer = 0f; 
     private float jumpCooldownTimer = 0f; 
+    private float spaceReleaseTimer = 0f; 
     
     private bool isGrounded;
     private bool isSpinDashing = false;
     private bool jumpRequested = false;
     private bool isJumping = false; 
+
+    private AudioSource spinAudioSource; 
 
     public bool IsInBallForm 
     { 
@@ -73,11 +90,14 @@ public class ImprovedPlayerController : MonoBehaviour
 
         if (sonicModel != null) animator = sonicModel.GetComponent<Animator>(); 
         if (Camera.main != null) camTransform = Camera.main.transform;
+
+        spinAudioSource = gameObject.AddComponent<AudioSource>();
+        spinAudioSource.playOnAwake = false;
     }
 
     void Update()
     {
-        if (!canControl) return; // Freezes Update if Game Over or Win
+        if (!canControl) return; 
 
         if (jumpCooldownTimer > 0f) jumpCooldownTimer -= Time.deltaTime;
 
@@ -88,7 +108,7 @@ public class ImprovedPlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!canControl) return; // Freezes physics if Game Over or Win
+        if (!canControl) return; 
 
         ApplyMomentumAndRotation(); 
         ApplyCustomGravity();
@@ -123,14 +143,20 @@ public class ImprovedPlayerController : MonoBehaviour
         else
             idleTimer = 0f; 
 
+        bool wasAlreadyBoosting = currentBoostTimer > 0f;
+
         if (currentBoostTimer > 0f) currentBoostTimer -= Time.deltaTime; 
 
         if (animator != null) animator.SetBool("isCrouch", false);
 
         if (Input.GetKeyDown(KeyCode.F) && isGrounded && currentSpeed > 5f && !isDamaged)
         {
+            if (!wasAlreadyBoosting)
+            {
+                if (SpindashS1 != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(SpindashS1);
+            }
+            
             currentBoostTimer = boostDuration; 
-            Camera.main.GetComponent<AudioSource>().PlayOneShot(SpindashS1);
         }
         else if (Input.GetKey(KeyCode.F) && isGrounded && currentSpeed <= 5f && currentBoostTimer <= 0f && !isDamaged)
         {
@@ -149,24 +175,48 @@ public class ImprovedPlayerController : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space) && currentSpeed <= 0.11f)
             {
                 isSpinDashing = true;
+                spaceReleaseTimer = 0f; 
                 if (animator != null) animator.SetBool("isCrouch", false); 
                 
-                if (SpindashS1 != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(SpindashS1);
+                if (SpindashS1 != null)
+                {
+                    spinAudioSource.clip = SpindashS1;
+                    spinAudioSource.loop = false; 
+                    spinAudioSource.Play();
+                }
+
+                // --- NEW: Spawning the Dust Particle ---
+                if (spinDustPrefab != null && dustSpawnPoint != null && currentSpinDust == null)
+                {
+                    // Spawn it and make the spawn point its parent so it follows Sonic!
+                    currentSpinDust = Instantiate(spinDustPrefab, dustSpawnPoint.position, dustSpawnPoint.rotation, dustSpawnPoint);
+                }
                 
                 currentSpinCharge += spinChargeRate;
                 currentSpinCharge = Mathf.Clamp(currentSpinCharge, 0, maxSpinCharge);
+            }
+
+            if (isSpinDashing)
+            {
+                if (Input.GetKey(KeyCode.Space))
+                {
+                    spaceReleaseTimer = 0f; 
+                }
+                else
+                {
+                    spaceReleaseTimer += Time.deltaTime; 
+                    
+                    if (spaceReleaseTimer > 0.25f)
+                    {
+                        ExecuteSpinDashLaunch();
+                    }
+                }
             }
             return; 
         }
         else if (isSpinDashing)
         {
-            isSpinDashing = false;
-            if (SpindashS2 != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(SpindashS2);
-            currentSpeed = Mathf.Max(currentSpinCharge, 15f); 
-            currentSpinCharge = 0f;
-            currentBoostTimer = boostDuration;
-
-            if (moveDirection == Vector3.zero) moveDirection = transform.forward;
+            ExecuteSpinDashLaunch();
         }
 
         if (isDamaged) return; 
@@ -201,7 +251,8 @@ public class ImprovedPlayerController : MonoBehaviour
                 }
                 else
                 {
-                    currentSpeed += acceleration * Time.deltaTime;
+                    float rampedAccel = Mathf.Lerp(acceleration * startingAccelMultiplier, acceleration, currentSpeed / speedToMaxAccel);
+                    currentSpeed += rampedAccel * Time.deltaTime;
                 }
 
                 float currentSteerSpeed = Mathf.Lerp(turnSpeed, turnSpeed * 0.5f, currentSpeed / maxSpeed); 
@@ -239,6 +290,36 @@ public class ImprovedPlayerController : MonoBehaviour
             jumpCooldownTimer = 0.1f; 
             currentBoostTimer = 0f; 
         }
+    }
+
+    private void ExecuteSpinDashLaunch()
+    {
+        isSpinDashing = false;
+        
+        if (spinAudioSource != null) spinAudioSource.Stop(); 
+        if (SpindashS2 != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(SpindashS2);
+
+        // --- NEW: Dust Particle Release ---
+        if (currentSpinDust != null)
+        {
+            // Unparent it so it stops following Sonic
+            currentSpinDust.transform.SetParent(null);
+            
+            // Stop it from emitting new smoke
+            ParticleSystem ps = currentSpinDust.GetComponent<ParticleSystem>();
+            if (ps != null) ps.Stop();
+
+            // Destroy it after 2 seconds so the existing smoke has time to fade out nicely
+            Destroy(currentSpinDust, 2f);
+            
+            currentSpinDust = null; // Clear it so we can make a new one next time
+        }
+        
+        currentSpeed = Mathf.Max(currentSpinCharge, 15f); 
+        currentSpinCharge = 0f;
+        currentBoostTimer = boostDuration;
+
+        if (moveDirection == Vector3.zero) moveDirection = transform.forward;
     }
 
     private void ApplyMomentumAndRotation()
@@ -313,6 +394,14 @@ public class ImprovedPlayerController : MonoBehaviour
         currentSpeed = 0f; 
         currentBoostTimer = 0f;
         isSpinDashing = false;
+        if (spinAudioSource != null) spinAudioSource.Stop(); 
+        
+        // Destroy the dust instantly if Sonic takes a hit while charging
+        if (currentSpinDust != null)
+        {
+            Destroy(currentSpinDust);
+            currentSpinDust = null;
+        }
 
         if (animator != null)
         {
@@ -371,15 +460,29 @@ public class ImprovedPlayerController : MonoBehaviour
         currentBoostTimer = 0f;
         isSpinDashing = false;
         jumpRequested = false;
+        if (spinAudioSource != null) spinAudioSource.Stop();
+        
+        if (currentSpinDust != null)
+        {
+            Destroy(currentSpinDust);
+            currentSpinDust = null;
+        }
         
         isDamaged = false;
         if (animator != null) animator.SetBool("isDamage", false);
     }
 
-    // NEW: Call this when Game Over or Game Won to freeze Sonic!
     public void LockControls()
     {
         canControl = false;
+        if (spinAudioSource != null) spinAudioSource.Stop();
+        
+        if (currentSpinDust != null)
+        {
+            Destroy(currentSpinDust);
+            currentSpinDust = null;
+        }
+        
         if (rb != null)
         {
             rb.linearVelocity = Vector3.zero;
