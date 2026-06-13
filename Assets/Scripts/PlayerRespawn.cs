@@ -16,8 +16,11 @@ public class PlayerRespawn : MonoBehaviour
     private ImprovedPlayerController movementController;
     private bool isDead = false;
     public AudioSource bgmSource;
-
+    
     private Vector3 defaultStartPos; 
+    
+    // NEW: Prevents multiple spikes from killing you instantly
+    private float lastDamageTime = -10f; 
     
     void Start()
     {
@@ -25,7 +28,6 @@ public class PlayerRespawn : MonoBehaviour
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         GetComponent<PlayerScore>().UpdateHealthUI(health);
         
-        // Save his exact starting position the moment the game loads!
         defaultStartPos = transform.position; 
     }
 
@@ -48,6 +50,10 @@ public class PlayerRespawn : MonoBehaviour
     {
         if (isDead) return;
 
+        // --- THE FIX: Wait at least 1 second between health drops! ---
+        if (Time.time - lastDamageTime < 1.0f) return;
+        lastDamageTime = Time.time;
+
         health--;
         GetComponent<PlayerScore>().UpdateHealthUI(health);
         
@@ -64,12 +70,10 @@ public class PlayerRespawn : MonoBehaviour
 
     public void Respawn()
     {
-        // If we hit a checkpoint, go there
         if (currentRespawnPoint != null)
         {
             transform.position = currentRespawnPoint.position;
         }
-        // If we HAVEN'T hit a checkpoint yet, go back to the very beginning!
         else
         {
             transform.position = defaultStartPos;

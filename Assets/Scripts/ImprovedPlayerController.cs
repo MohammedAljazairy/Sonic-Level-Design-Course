@@ -14,9 +14,9 @@ public class ImprovedPlayerController : MonoBehaviour
     public AudioClip loseRingA;
 
     [Header("Visual Effects")]
-    public GameObject spinDustPrefab; // Drag your smoke particle prefab here!
-    public Transform dustSpawnPoint;  // Drag your empty GameObject here!
-    private GameObject currentSpinDust; // Keeps track of the smoke while charging
+    public GameObject spinDustPrefab; 
+    public Transform dustSpawnPoint;  
+    private GameObject currentSpinDust; 
 
     [Header("Momentum Settings")]
     public float acceleration = 15f;
@@ -33,9 +33,17 @@ public class ImprovedPlayerController : MonoBehaviour
     
     public AudioClip jumpA;
 
+    [Header("Air Control")]
+    public float maxAirSpeed = 15f;  // Capped speed when trying to move mid-air
+    public float airTurnSpeed = 8f;  // Stiffer steering so he doesn't twitch in the air
+
     [Header("Jump & Physics")]
     public float jumpForce = 10f;
     public float customGravityMultiplier = 2f; 
+
+    [Header("Damage Settings")]
+    public float damageKnockbackUpward = 22f;   // Launch height (increased!)
+    public float damageKnockbackBackward = 12f; // Pushback distance
     
     [Header("Ground Check (CheckSphere)")]
     public float groundCheckRadius = 0.2f; 
@@ -53,7 +61,7 @@ public class ImprovedPlayerController : MonoBehaviour
     public bool isDamaged = false; 
     public AudioClip SpindashS1;
     public AudioClip SpindashS2;
- 
+    public AudioClip rollSound; 
     
     public bool canControl = true; 
 
@@ -185,10 +193,8 @@ public class ImprovedPlayerController : MonoBehaviour
                     spinAudioSource.Play();
                 }
 
-                // --- NEW: Spawning the Dust Particle ---
                 if (spinDustPrefab != null && dustSpawnPoint != null && currentSpinDust == null)
                 {
-                    // Spawn it and make the spawn point its parent so it follows Sonic!
                     currentSpinDust = Instantiate(spinDustPrefab, dustSpawnPoint.position, dustSpawnPoint.rotation, dustSpawnPoint);
                 }
                 
@@ -219,8 +225,14 @@ public class ImprovedPlayerController : MonoBehaviour
             ExecuteSpinDashLaunch();
         }
 
-        if (isDamaged) return; 
-
+        if (isDamaged) {
+        if (animator != null)
+            {
+                animator.SetBool("isDamage", true);
+                animator.SetBool("isFalling", !isGrounded);
+            }
+        return; 
+        }
         Vector3 inputDir = Vector3.zero;
         if (camTransform != null)
         {
@@ -231,12 +243,15 @@ public class ImprovedPlayerController : MonoBehaviour
             inputDir = (camForward * z + camRight * x).normalized;
         }
 
+        // --- NEW: Stiffer Steering if Airborne ---
+        float activeTurnSpeed = isGrounded ? turnSpeed : airTurnSpeed;
+
         if (currentBoostTimer > 0f)
         {
             currentSpeed -= (deceleration * 0.1f) * Time.deltaTime; 
             
             if (inputDir.magnitude >= 0.1f)
-                moveDirection = Vector3.MoveTowards(moveDirection, inputDir, (turnSpeed * 0.1f) * Time.deltaTime).normalized;
+                moveDirection = Vector3.MoveTowards(moveDirection, inputDir, (activeTurnSpeed * 0.1f) * Time.deltaTime).normalized;
         }
         else
         {
@@ -251,11 +266,22 @@ public class ImprovedPlayerController : MonoBehaviour
                 }
                 else
                 {
-                    float rampedAccel = Mathf.Lerp(acceleration * startingAccelMultiplier, acceleration, currentSpeed / speedToMaxAccel);
-                    currentSpeed += rampedAccel * Time.deltaTime;
+                    // --- NEW: Capped Acceleration if Airborne ---
+                    if (isGrounded)
+                    {
+                        float rampedAccel = Mathf.Lerp(acceleration * startingAccelMultiplier, acceleration, currentSpeed / speedToMaxAccel);
+                        currentSpeed += rampedAccel * Time.deltaTime;
+                    }
+                    else
+                    {
+                        // In the air, you can only accelerate up to maxAirSpeed. 
+                        // (But if you jump while going 30, it preserves your momentum!)
+                        if (currentSpeed < maxAirSpeed)
+                            currentSpeed += (acceleration * 0.5f) * Time.deltaTime;
+                    }
                 }
 
-                float currentSteerSpeed = Mathf.Lerp(turnSpeed, turnSpeed * 0.5f, currentSpeed / maxSpeed); 
+                float currentSteerSpeed = Mathf.Lerp(activeTurnSpeed, activeTurnSpeed * 0.5f, currentSpeed / maxSpeed); 
                 if (moveDirection == Vector3.zero) moveDirection = inputDir; 
                 moveDirection = Vector3.MoveTowards(moveDirection, inputDir, currentSteerSpeed * Time.deltaTime).normalized;
             }
@@ -266,6 +292,10 @@ public class ImprovedPlayerController : MonoBehaviour
         }
 
         float activeSpeedLimit = (currentBoostTimer > 0f) ? Mathf.Max(maxSpeed, maxSpinCharge) : maxSpeed;
+        
+        // If he is in the air and moving slower than maxAirSpeed, cap his new movements to maxAirSpeed
+        if (!isGrounded && currentSpeed < maxAirSpeed) activeSpeedLimit = maxAirSpeed;
+        
         currentSpeed = Mathf.Clamp(currentSpeed, 0, activeSpeedLimit);
 
         if (animator != null) 
@@ -299,20 +329,13 @@ public class ImprovedPlayerController : MonoBehaviour
         if (spinAudioSource != null) spinAudioSource.Stop(); 
         if (SpindashS2 != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(SpindashS2);
 
-        // --- NEW: Dust Particle Release ---
         if (currentSpinDust != null)
         {
-            // Unparent it so it stops following Sonic
             currentSpinDust.transform.SetParent(null);
-            
-            // Stop it from emitting new smoke
             ParticleSystem ps = currentSpinDust.GetComponent<ParticleSystem>();
             if (ps != null) ps.Stop();
-
-            // Destroy it after 2 seconds so the existing smoke has time to fade out nicely
             Destroy(currentSpinDust, 2f);
-            
-            currentSpinDust = null; // Clear it so we can make a new one next time
+            currentSpinDust = null; 
         }
         
         currentSpeed = Mathf.Max(currentSpinCharge, 15f); 
@@ -390,13 +413,15 @@ public class ImprovedPlayerController : MonoBehaviour
             }
         }
 
+        // --- FIX: The Ball Form Override ---
         isDamaged = true;
         currentSpeed = 0f; 
         currentBoostTimer = 0f;
         isSpinDashing = false;
-        if (spinAudioSource != null) spinAudioSource.Stop(); 
+        isJumping = false; // This immediately breaks him out of the Ball Model!
         
-        // Destroy the dust instantly if Sonic takes a hit while charging
+        if (spinAudioSource != null) spinAudioSource.Stop(); 
+
         if (currentSpinDust != null)
         {
             Destroy(currentSpinDust);
@@ -410,11 +435,19 @@ public class ImprovedPlayerController : MonoBehaviour
             animator.SetBool("isCrouch", false);
         }
 
-        Vector3 knockbackDir = (transform.position - hazardPosition).normalized;
-        knockbackDir.y = 1f; 
-        
+        // --- FIX: Increased Knockback Variables ---
+        Vector3 knockbackDir = transform.position - hazardPosition;
+        knockbackDir.y = 0; 
+        if (knockbackDir == Vector3.zero) knockbackDir = -transform.forward; 
+        knockbackDir.Normalize();
+
         rb.linearVelocity = Vector3.zero; 
-        rb.AddForce(knockbackDir * 15f, ForceMode.Impulse); 
+        
+        // Uses the new variables so you can adjust this inside Unity!
+        Vector3 arcJump = (knockbackDir * damageKnockbackBackward) + (Vector3.up * damageKnockbackUpward);
+        rb.AddForce(arcJump, ForceMode.Impulse); 
+
+        jumpCooldownTimer = 0.2f;
 
         Invoke("RecoverFromDamage", 1.5f);
     }
@@ -459,6 +492,7 @@ public class ImprovedPlayerController : MonoBehaviour
         currentSpinCharge = 0f;
         currentBoostTimer = 0f;
         isSpinDashing = false;
+        isJumping = false;
         jumpRequested = false;
         if (spinAudioSource != null) spinAudioSource.Stop();
         
