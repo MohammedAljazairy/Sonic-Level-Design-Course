@@ -22,7 +22,7 @@ public class Checkpoint : MonoBehaviour
             respawnScript.SetCheckpoint(transform);
             if (ckS != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(ckS);
             isActivated = true;
-            Debug.Log("Checkpoint Reached!");
+            //Debug.Log("Checkpoint Reached!");
         }
     }
 }

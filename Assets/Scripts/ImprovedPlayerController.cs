@@ -61,7 +61,7 @@ public class ImprovedPlayerController : MonoBehaviour
     public bool isDamaged = false; 
     public AudioClip SpindashS1;
     public AudioClip SpindashS2;
-    public AudioClip rollSound; 
+     
     
     public bool canControl = true; 
 

@@ -9,9 +9,10 @@ public class PlayerScore : MonoBehaviour
     public int score = 0;
     public float timeElapsed = 0f;
     public bool isLevelFinished = false;
-    public bool isGameActive = false; 
+    public bool isGameActive = false;
     public AudioSource bgmSource;
-    
+    public AudioSource sfxSource;
+    private int nextLifeTarget = 100;
     [Header("In-Game UI")]
     public TextMeshProUGUI ringText;
     public TextMeshProUGUI scoreText;
@@ -27,9 +28,9 @@ public class PlayerScore : MonoBehaviour
     [Header("Audio")]
     public AudioClip tallyScoreSound;
     public AudioClip tallyScoreSoundLoop;
-    public AudioClip WinSound; 
-    public AudioClip finishA;  
-
+    public AudioClip WinSound; // The victory theme song
+    public AudioClip finishA;  // The sound when you first touch the signpost
+    public AudioClip extraLifeSound;
     void Start()
     {
         if (winPanel != null) winPanel.SetActive(false);
@@ -53,19 +54,48 @@ public class PlayerScore : MonoBehaviour
     public void AddRings(int amount)
     {
         ringCount += amount;
-        
-        // --- EXTRA FIX: Ensure rings can never go below 0 in the UI ---
         ringCount = Mathf.Max(0, ringCount);
-        
+        if (ringCount >= nextLifeTarget)
+        {
+            nextLifeTarget += 100; // Bump the target to 200, 300, etc.
+
+            // Play the 1-Up Sound
+            if (extraLifeSound != null && sfxSource != null) sfxSource.PlayOneShot(extraLifeSound);
+
+            // Add 1 to Health
+            PlayerRespawn respawn = GetComponent<PlayerRespawn>();
+            if (respawn != null)
+            {
+                respawn.health++;
+                UpdateHealthUI(respawn.health);
+            }
+            if (bgmSource != null)
+            {
+                StopCoroutine("PauseBGMForExtraLife"); // Stop any existing timer first
+                StartCoroutine(PauseBGMForExtraLife());
+            }
+        }
         AddScore(amount * 100);
         UpdateUI();
     }
-
+private IEnumerator PauseBGMForExtraLife()
+{
+    // Debug.Log("Pausing BGM volume!");
+    
+    // Store the original volume
+    float originalVolume = bgmSource.volume;
+    
+    // Silence!
+    bgmSource.volume = 0f;
+    
+    yield return new WaitForSeconds(3f);
+    
+    // Restore the volume
+    bgmSource.volume = originalVolume;
+}
     public void AddScore(int amount)
     {
         score += amount;
-        
-        // Make sure score never dips below 0 either!
         score = Mathf.Max(0, score);
         UpdateUI();
     }
@@ -74,6 +104,7 @@ public class PlayerScore : MonoBehaviour
     {
         int droppedRings = ringCount;
         ringCount = 0;
+        nextLifeTarget = 100;
         UpdateUI();
         return droppedRings;
     }
@@ -99,32 +130,39 @@ public class PlayerScore : MonoBehaviour
         if (isLevelFinished) return;
         isLevelFinished = true;
         
+        // Freeze Sonic instantly
         GetComponent<ImprovedPlayerController>().LockControls();
 
-        if (WinSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(WinSound);
+        // 1. Play the instant "hit signpost" win sound. BGM keeps playing!
+        if (WinSound != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(finishA);
 
+        // Calculate final bonuses
         int timeBonus = CalculateTimeBonus(timeElapsed);
-        
-        // --- THE MAIN FIX: Force the ring bonus to bottom out at 0 ---
         int ringBonus = Mathf.Max(0, ringCount * 100); 
-
+    
+        // Start the timed sequence
         StartCoroutine(WinSequenceTiming(timeBonus, ringBonus));
     }
 
     private IEnumerator WinSequenceTiming(int tBonus, int rBonus)
     {
+        // 2. Wait 2 seconds while the level BGM is still playing
         yield return new WaitForSeconds(2f);
 
+        // 3. Stop the BGM and play the Victory Song
         if (bgmSource != null) bgmSource.Stop();
-        if (finishA != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(finishA);
+        if (finishA != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(WinSound);
 
+        // Show the UI panel with the static numbers
         if (winPanel != null) winPanel.SetActive(true);
         winTimeBonusText.text = "" + tBonus;
         winRingBonusText.text = "" + rBonus;
         winTotalScoreText.text = "" + score;
 
+        // 4. Wait 3 more seconds (making it exactly 5 seconds since winning)
         yield return new WaitForSeconds(3f);
 
+        // 5. Start the rapid tally loop
         StartCoroutine(TallyScore(tBonus, rBonus));
     }
 
@@ -141,22 +179,29 @@ public class PlayerScore : MonoBehaviour
         return 0;
     }
 
-    private IEnumerator TallyScore(int tBonus, int rBonus)
+   private IEnumerator TallyScore(int tBonus, int rBonus)
     {
         while (tBonus > 0 || rBonus > 0)
         {
-            int addAmount = 500;
+            // We want to subtract 500 at a time, to make the counter go fast...
+            int maxTake = 500;
 
             if (tBonus > 0)
             {
-                tBonus -= addAmount;
-                score += addAmount;
+                // ...but if we have LESS than 500 left, only take what is left!
+                int takeAmount = Mathf.Min(maxTake, tBonus);
+                
+                tBonus -= takeAmount;
+                score += takeAmount;
                 winTimeBonusText.text = "" + tBonus;
             }
             else if (rBonus > 0)
             {
-                rBonus -= addAmount;
-                score += addAmount;
+                // Do the exact same safe math for the rings!
+                int takeAmount = Mathf.Min(maxTake, rBonus);
+                
+                rBonus -= takeAmount;
+                score += takeAmount;
                 winRingBonusText.text = "" + rBonus;
             }
 
