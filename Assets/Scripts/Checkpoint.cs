@@ -4,7 +4,11 @@ public class Checkpoint : MonoBehaviour
 {
     private bool isActivated = false;
     public AudioClip ckS;
-    
+    private Animator Spin;
+    void Start()
+    {
+        Spin=GetComponent<Animator>();
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (isActivated) return; 
@@ -13,6 +17,8 @@ public class Checkpoint : MonoBehaviour
         
         if (respawnScript != null)
         {
+            Spin.SetTrigger("CheckPoint");
+            Spin.Play("Spinorooony");
             respawnScript.SetCheckpoint(transform);
             if (ckS != null) Camera.main.GetComponent<AudioSource>().PlayOneShot(ckS);
             isActivated = true;
