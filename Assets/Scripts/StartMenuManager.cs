@@ -13,9 +13,9 @@ public class StartMenuManager : MonoBehaviour
     public VideoPlayer introVideo;
     public GameObject titleCanvas;      
     public GameObject gameplayUI;       
-    public GameObject loadingBlackScreen; // NEW: Hides the flash!
+    public GameObject loadingBlackScreen; // Hides the flash
     public float videoDuration = 4f;  
-    public float cameraBlendTime = 2f;    // NEW: How long the camera takes to fly to Sonic
+    public float cameraBlendTime = 2f;    // How long the camera takes to fly to Sonic
 
     [Header("Audio")]
     public AudioSource titleMusic;
@@ -45,20 +45,30 @@ public class StartMenuManager : MonoBehaviour
         if (titleCanvas != null) titleCanvas.SetActive(false); 
         if (gameplayUI != null) gameplayUI.SetActive(false);
         
-        // Turn ON the black screen immediately to hide the flash!
         if (loadingBlackScreen != null) loadingBlackScreen.SetActive(true);
-
         if (levelBGM != null) levelBGM.Stop();
         
-        // --- FIX: Custom Title Music Loop ---
         if (titleMusic != null) 
         {
-            titleMusic.loop = false; // Turn off default looping
+            titleMusic.loop = false; 
             StartCoroutine(TitleMusicLoop());
         }
         
-        if (introVideo != null) introVideo.Play();
+        // --- THE WEBGL VIDEO FIX ---
+        if (introVideo != null) 
+        {
+            // 1. Tell it we are using a URL, not a clip
+            introVideo.source = UnityEngine.Video.VideoSource.Url;
+            
+            // 2. Build the correct path with a forward slash for WebGL!
+            string videoPath = Application.streamingAssetsPath + "/SegaIntro.mp4";
+            introVideo.url = videoPath;
+            
+            // 3. Play it!
+            introVideo.Play();
+        }
 
+        // CRITICAL: Start the timer so the game actually lets you press Enter!
         StartCoroutine(VideoTimerRoutine());
     }
 
